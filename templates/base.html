@@ -1,28 +1,79 @@
 {% load static %}
-<!doctype html>
-<html lang="ko">
+<!DOCTYPE html>
+<html lang="ko" class="dark">
 <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap.min.css' %}">
-    <!-- pybo CSS -->
-    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
-    <title>Hello, pybo!</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pybo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#38bdf8',
+              secondary: '#64748b',
+            }
+          }
+        }
+      }
+    </script>
 </head>
-<body>
-<!-- 네비게이션바 -->
-{% include "navbar.html" %}
-<!-- 기본 템플릿 안에 삽입될 내용 Start -->
-{% block content %}
-{% endblock %}
-<!-- 기본 템플릿 안에 삽입될 내용 End -->
- <!-- Bootstrap JS -->
-<script src="{% static 'bootstrap.min.js' %}"></script>
-<!-- 자바스크립트 Start -->
-{% block script %}
-{% endblock %}
-<!-- 자바스크립트 End -->
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-gray-100">
+    <div class="flex min-h-screen">
+        <!-- 사이드바 -->
+        <aside class="hidden md:flex flex-col w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 py-8 px-6">
+            <div class="flex items-center gap-2 mb-10">
+                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                <span class="font-bold text-2xl text-primary dark:text-blue-400">Pybo</span>
+            </div>
+            <nav class="flex flex-col gap-2 text-lg">
+                <a href="{% url 'pybo:index' %}" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition font-medium {% if request.resolver_match.url_name == 'index' %}bg-primary/10 dark:bg-primary/20 text-primary{% endif %}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                    질문
+                </a>
+                <a href="{% url 'pybo:index' %}?sort=popular" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition font-medium {% if sort == 'popular' %}bg-primary/10 dark:bg-primary/20 text-primary{% endif %}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 17.75L18.16 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.48 4.73L5.84 21z"/></svg>
+                    인기
+                </a>
+                <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 7h10M7 12h4m1 8a9 9 0 100-18 9 9 0 000 18z"/></svg>
+                    태그
+                </a>
+                <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a7.5 7.5 0 0113 0"/></svg>
+                    내 프로필
+                </a>
+            </nav>
+        </aside>
+        <!-- 메인+탑바 -->
+        <div class="flex-1 flex flex-col min-w-0">
+            <!-- 상단 네비게이션 (얇게) -->
+            <header class="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur border-b border-gray-200 dark:border-gray-800 h-14 flex items-center px-4">
+                <form method="get" action="{% url 'pybo:index' %}" class="flex-1 max-w-xl">
+                    <input type="text" name="kw" placeholder="검색어를 입력하세요"
+                        class="w-full rounded-full px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary transition"
+                        value="{{ kw|default_if_none:'' }}">
+                </form>
+                <button id="dark-toggle" class="ml-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition" aria-label="다크모드 토글">
+                    <svg id="icon-moon" class="w-6 h-6 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/></svg>
+                    <svg id="icon-sun" class="w-6 h-6 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2m11-11h-2M3 12H1m16.95 6.95l-1.41-1.41M6.34 6.34L4.93 4.93m12.02 0l-1.41 1.41M6.34 17.66l-1.41 1.41"/></svg>
+                </button>
+            </header>
+            <!-- 메인 컨텐츠 -->
+            <main class="flex-1 px-2 sm:px-6 md:px-12 py-10">
+                <div class="max-w-6xl mx-auto">
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+    <script>
+      document.getElementById('dark-toggle').onclick = () => {
+        document.documentElement.classList.toggle('dark');
+      };
+    </script>
+    {% block script %}{% endblock %}
 </body>
 </html>
